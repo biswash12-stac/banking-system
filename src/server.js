@@ -3,13 +3,18 @@ dotenv.config()
 import express from "express"
 import { connectdb, getConnectionStatus } from "./lib/db.Connect.js"
 import router from "./Routes/authRoutes.js"
+import accountRouter from "./Routes/accountRoutes.js"
+import cookieParser from "cookie-parser"
+
 const app = express()
 
 
 // middleware
 app.use(express.json())
+app.use(cookieParser())
 
 app.use('/api/routes', router )
+app.use("/api/routes/account" , accountRouter)
 
 
 
