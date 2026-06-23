@@ -1,15 +1,22 @@
 import mongoose from "mongoose";
 
-const accountSchem = new mongoose.Schema({
-
-// taking refrence for userid from userModel
-    user : {
-        type : mongoose.Schema.Types.ObjectId,
-        ref : "User",
-        required:[true, "account must be associated with userID"],
-        index : true // this index help u to search user faster in data base
-    } ,
-     status: {
+const accountSchema = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: [true, "account must be associated with userID"],
+        index: true
+    },
+    
+    // ✅ ADD THIS: Account number for users to see
+    accountNumber: {
+        type: String,
+        unique: true,
+        required: true,
+        index: true
+    },
+    
+    status: {
         type: String,
         enum: {
             values: ["active", "blocked", "frozen", "closed"],
@@ -33,10 +40,16 @@ const accountSchem = new mongoose.Schema({
         }
     },
 
+}, { timestamps: true });
 
+// ✅ ADD: Pre-save hook to auto-generate account number
+accountSchema.pre('save', function(next) {
+    if (!this.accountNumber) {
+        const timestamp = Date.now().toString().slice(-6);
+        const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        this.accountNumber = `ACC-${timestamp}-${random}`;
+    }
+    next();
+});
 
-},{timestamps:true})
-
-
-accountSchem.index({user:1 , status:1})
-export const userAccount = mongoose.model("userAccount" , accountSchem)
+export const userAccount = mongoose.model("userAccount", accountSchema);
